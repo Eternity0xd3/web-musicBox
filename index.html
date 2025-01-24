@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Audio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/addons/p5.sound.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/addons/p5.dom.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>audio</title>
   </head>
   <body>
-    <script src="sketch.js"></script>
+    <div class="canvasBox">
+      <canvas></canvas>
+    </div>
+    <button id="btn">play</button>
+    <input type="file" id="audioFile" accept="audio/*">
   </body>
+  <script src="visualizer.js"></script>
 </html>
