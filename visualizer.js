@@ -1,7 +1,7 @@
 let song;
 let bgImgElement = document.getElementById("bg-img");
 let coverImg = document.getElementById("coverImg");
-let button = document.getElementById("btn");
+let playButton = document.getElementById("play-btn");
 let canvas = document.querySelector("canvas");
 let enhance = document.getElementById("enhance");
 let canvasCtx = canvas.getContext("2d");
@@ -16,8 +16,15 @@ let dataArray;
 let preDataArray;
 let preProcessedDataArray;
 let bufferLength;
+let animationId;
 var isPlaying = false;
-var isFirst = true;
+
+// some changeable arguments
+let smoothingOfNormal = 0.7; // 普通模式下的平滑度
+let smoothingOfEnhancement = 0.84; // 加强(导数)模式下的平滑度
+let decayRate = 0.6; // 衰减率，用于逐渐减少音频图变化量(加强模式下)
+let p = 0; // 加强(导数)模式下原数据比例
+let d = 24; // 加强(导数)模式下变化率的倍率
 
 init();
 
@@ -27,27 +34,25 @@ function init() {
   canvas.height = (window.innerHeight / 5) * devicePixelRatio;
 
   //button
-  button.onclick = function () {
+  playButton.onclick = function () {
     togglePlaying();
   };
   //progress bar
   progressBar.addEventListener("input", seekAudio);
 
-  song = new Audio("./resources/file.mp3"); //default song
-
   //load file
   document
     .getElementById("audioFile")
     .addEventListener("change", function (event) {
-      song.pause();
+      if (song) song.pause();
       isPlaying = false;
-      button.innerHTML = "play";
+      playButton.innerHTML = "play";
       const file = event.target.files[0];
       const fileURL = URL.createObjectURL(file);
       song = new Audio(fileURL);
-      isFirst = true;
       updateDuration();
       fileNameElement.textContent = file.name;
+      analyseAudio();
       togglePlaying();
 
       // 读取mp3文件封面
@@ -85,11 +90,13 @@ function getBase64String(data) {
   return btoa(base64String);
 }
 
+// 进度条控制时间
 function seekAudio() {
   const seekTime = (progressBar.value / 100) * song.duration;
   song.currentTime = seekTime;
 }
 
+// 时间控制进度条
 function updateProgressBar() {
   if (!isNaN(song.duration)) {
     const value = (song.currentTime / song.duration) * 100;
@@ -101,6 +108,7 @@ function updateProgressBar() {
   }
 }
 
+// 总时长显示
 function updateDuration() {
   if (song.duration) {
     durationLabel.textContent = formatTime(song.duration);
@@ -117,25 +125,30 @@ function formatTime(seconds) {
     .padStart(2, "0")}`;
 }
 
+// 播放-暂停按钮
 function togglePlaying() {
+  if (!song) {
+    alert("请先选择一个音频文件");
+    return;
+  }
   if (!isPlaying) {
-    if (isFirst) analyseAudio();
     song.play();
-    button.innerHTML = "pause";
-    isFirst = false;
+    playButton.innerHTML = "pause";
   } else {
     song.pause();
-    button.innerHTML = "play";
+    playButton.innerHTML = "play";
   }
   isPlaying = !isPlaying;
   requestAnimationFrame(updateProgressBar);
 }
 
+//音频分析
 function analyseAudio() {
   if (!song) {
     alert("请先选择一个音频文件");
     return;
   }
+  if (animationId !== undefined) window.cancelAnimationFrame(animationId);
   audioContext = new window.AudioContext();
   analyser = audioContext.createAnalyser();
   analyser.fftSize = 512;
@@ -151,24 +164,25 @@ function analyseAudio() {
 }
 
 function drawFreqGraph() {
-  requestAnimationFrame(drawFreqGraph);
+  animationId = requestAnimationFrame(drawFreqGraph);
 
   analyser.getByteFrequencyData(dataArray);
 
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight / 3;
+
   canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const barWidth = canvas.width / bufferLength - 4;
+  const barWidth = canvas.width / bufferLength + 0.8;
   let barHeight;
   let x = 0;
   let processedDataArray = new Uint8Array(bufferLength);
 
-  let decayRate = 0.6; // 衰减率，用于逐渐减少变化量
-  let deltaBuffer = new Array(bufferLength).fill(0); // 初始化变化量缓冲区
+  if (!deltaBuffer) var deltaBuffer = new Array(bufferLength).fill(0); // 变化量缓冲区
 
+  // 频率图绘制模式(导数加强/普通)
   if (enhance.checked) {
-    let p = 0;
-    let d = 24;
-    var smoothing = 0.84;
+    var smoothing = smoothingOfEnhancement;
     for (let i = 0; i < bufferLength; i++) {
       if (preDataArray === undefined) {
         break;
@@ -179,10 +193,11 @@ function drawFreqGraph() {
       processedDataArray[i] = dataArray[i] * p + deltaBuffer[i];
     }
   } else {
+    var smoothing = smoothingOfNormal;
     processedDataArray = dataArray.slice();
-    var smoothing = 0.7;
   }
 
+  // 平滑处理
   for (let i = 0; i < bufferLength; i++) {
     processedDataArray[i] = preProcessedDataArray
       ? preProcessedDataArray[i] * smoothing +
@@ -190,13 +205,19 @@ function drawFreqGraph() {
       : processedDataArray[i];
   }
 
+  // 绘制频率图
   for (let i = 0; i < bufferLength; i++) {
     barHeight = (processedDataArray[i] / 255) * canvas.height;
 
     canvasCtx.fillStyle = "rgb(" + i + "," + (255 - i) + ",255)";
-    canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+    canvasCtx.fillRect(
+      x,
+      canvas.height - barHeight,
+      barWidth - 1,
+      barHeight + 2
+    );
 
-    x += barWidth + 1;
+    x += barWidth;
   }
   preDataArray = dataArray.slice(); // 确保复制数组数据，而不是引用
   preProcessedDataArray = processedDataArray.slice();
