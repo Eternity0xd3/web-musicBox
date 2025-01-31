@@ -4,13 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>audio</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="canvasBox">
-      <canvas></canvas>
+    <div class="container">
+      <div id="bg-img"></div>
+      <div class="progressBarContainer">
+        <span id="fileName">default song</span>
+        <input type="range" id="progressBar" value="0" max="100" step="1" />
+        <span id="currentTime">00:00</span>
+        <button id="btn">play</button>
+        <input type="file" id="audioFile" accept="audio/*" />
+        <input type="checkbox" id="enhance" />加强
+        <span id="duration">00:00</span>
+      </div>
+      <div id="coverImg"></div>
+      <div class="canvasBox">
+        <canvas></canvas>
+      </div>
     </div>
-    <button id="btn">play</button>
-    <input type="file" id="audioFile" accept="audio/*">
   </body>
+  <script src="./utils/dist/jsmediatags.min.js"></script>
   <script src="visualizer.js"></script>
 </html>
