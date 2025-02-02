@@ -1,30 +1,31 @@
-let song;
-let bgImgElement = document.getElementById("bg-img");
-let coverImg = document.getElementById("coverImg");
-let playButton = document.getElementById("play-btn");
-let canvas = document.querySelector("canvas");
-let enhance = document.getElementById("enhance");
-let canvasCtx = canvas.getContext("2d");
-let progressBar = document.getElementById("progressBar");
-let durationLabel = document.getElementById("duration");
-let currentTimeLabel = document.getElementById("currentTime");
-let fileNameElement = document.getElementById("fileName");
-let bgImg;
-let audioContext;
-let analyser;
-let dataArray;
-let preDataArray;
-let preProcessedDataArray;
-let bufferLength;
-let animationId;
+var song;
+var bgImgElement = document.getElementById("bg-img");
+var coverImg = document.getElementById("coverImg");
+var playButton = document.getElementById("play-btn");
+var canvas = document.querySelector("canvas");
+var enhance = document.getElementById("enhance");
+var canvasCtx = canvas.getContext("2d");
+var progressBar = document.getElementById("progressBar");
+var durationLabel = document.getElementById("duration");
+var currentTimeLabel = document.getElementById("currentTime");
+var fileNameElement = document.getElementById("fileName");
+var bgImg;
+var audioContext;
+var analyser;
+var dataArray;
+var preDataArray;
+var preProcessedDataArray;
+var bufferLength;
+var animationId;
+var deltaBuffer;
 var isPlaying = false;
 
 // some changeable arguments
 let smoothingOfNormal = 0.7; // 普通模式下的平滑度
-let smoothingOfEnhancement = 0.84; // 加强(导数)模式下的平滑度
-let decayRate = 0.6; // 衰减率，用于逐渐减少音频图变化量(加强模式下)
-let p = 0; // 加强(导数)模式下原数据比例
-let d = 24; // 加强(导数)模式下变化率的倍率
+let smoothingOfEnhancement = 0.85; // 加强(导数)模式下的平滑度
+let decayRate = 0.7; // 衰减率，用于逐渐减少音频图变化量(加强模式下)
+let p = 0.15; // 加强(导数)模式下原数据比例
+let d = 5; // 加强(导数)模式下变化率的倍率
 
 init();
 
@@ -168,17 +169,11 @@ function drawFreqGraph() {
 
   analyser.getByteFrequencyData(dataArray);
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight / 3;
-
-  canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const barWidth = canvas.width / bufferLength + 0.8;
-  let barHeight;
-  let x = 0;
   let processedDataArray = new Uint8Array(bufferLength);
 
-  if (!deltaBuffer) var deltaBuffer = new Array(bufferLength).fill(0); // 变化量缓冲区
+  if (deltaBuffer === undefined || deltaBuffer.length !== bufferLength) {
+    deltaBuffer = new Array(bufferLength).fill(0); // 变化量缓冲区
+  }
 
   // 频率图绘制模式(导数加强/普通)
   if (enhance.checked) {
@@ -206,6 +201,15 @@ function drawFreqGraph() {
   }
 
   // 绘制频率图
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight / 3;
+
+  canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const barWidth = canvas.width / bufferLength + 0.8;
+  let barHeight;
+  let x = 0;
+
   for (let i = 0; i < bufferLength; i++) {
     barHeight = (processedDataArray[i] / 255) * canvas.height;
 
