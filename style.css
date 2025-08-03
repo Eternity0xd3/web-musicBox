@@ -1,0 +1,53 @@
+body {
+  background-image: url("https://api.imlazy.ink/img");
+  background-size: cover;
+  background-attachment: fixed;
+  color: black;
+}
+.title-container {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.progressBarContainer {
+  /* background-color: rgba(255, 255, 255, 0.5); */
+  padding: 20px;
+  border-radius: 10px;
+  width: 50%;
+  margin: 0 auto;
+  position: relative;
+  top: 10px;
+  text-align: center;
+}
+
+#progressBar {
+  width: 100%;
+}
+
+#currentTime,
+#duration {
+  font-size: 16px;
+  margin: 0 5px;
+}
+
+#currentTime {
+  float: left;
+}
+
+#play-btn {
+  float: centre;
+  border: 2px solid black;
+  border-radius: 5px;
+  padding: 4px 8px;
+}
+
+#duration {
+  float: right;
+}

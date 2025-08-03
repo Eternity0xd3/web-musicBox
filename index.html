@@ -1,29 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>audio</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>Netease Cloud Music-box</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.3.4/dist/axios.min.js"></script>
+    <script type="module" src="./script.js"></script>
+    <script src="./visualizer.js"></script>
+    <script src="./musicPlayer.js"></script>
   </head>
-  <body>
-    <div class="container">
-      <div id="bg-img"></div>
-      <div class="progressBarContainer">
-        <span id="fileName">Title</span>
-        <input type="range" id="progressBar" value="0" max="100" step="1" />
-        <span id="currentTime">00:00</span>
-        <button id="play-btn">play</button>
-        <input type="file" id="audioFile" accept="audio/*" />
-        <input type="checkbox" id="enhance" />切换图像
-        <span id="duration">00:00</span>
+  <body class="font-sans min-h-screen flex flex-col">
+    <header class="mx-auto w-[800px] px-6 py-6">
+      <div class="title-container mx-auto px-4">
+        <h1 class="text-3xl font-bold text-center">网易云音乐</h1>
+        <div class="progressBarContainer">
+          <span id="title">Title</span>
+          <input type="range" id="progressBar" value="0" max="100" step="1" />
+          <span id="currentTime">00:00</span>
+          <button id="play-btn">play</button>
+          <span id="duration">00:00</span>
+        </div>
+        <div class="flex justify-center mt-4 gap-2">
+          <button
+            id="toggle-display-btn"
+            class="p-2 bg-transparent glass-effect"
+          >
+            展开/收起
+          </button>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="输入歌单ID"
+            class="p-2 w-96 bg-transparent glass-effect"
+          />
+          <button
+            id="search-btn"
+            class="p-2 bg-blue-500 hover-effect"
+            onclick="alert('以后会做的')"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+          </button>
+        </div>
       </div>
-      <div id="coverImg"></div>
-      <div class="canvasBox">
-        <canvas></canvas>
-      </div>
+    </header>
+    <main class="container mx-auto px-4 py-6 flex-grow relative z-10" id="main">
+      <div
+        id="music-list-container"
+        class="glass-effect p-4 animate-fadeIn"
+      ></div>
+    </main>
+    <div class="fixed bottom-0 left-0 w-full bg-black bg-opacity-0 z-0">
+      <canvas class="w-full h-full block" id="canvas"></canvas>
     </div>
   </body>
-  <script src="./utils/dist/jsmediatags.min.js"></script>
-  <script src="visualizer.js"></script>
 </html>
