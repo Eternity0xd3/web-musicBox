@@ -1,10 +1,12 @@
-const apiUrl = "https://163api.qijieya.cn";
+const apiUrl = "https://music.eternity0.xyz";
 const playListId = "4974517819";
 let limit = 15;
 let offset = 0;
-let musicListUrl = `${apiUrl}/playlist/track/all?id=${playListId}&limit=${limit}&offset=${offset}`;
+let musicListUrl = `${apiUrl}/api/playlist/track?id=${playListId}&limit=${limit}&offset=${offset}`;
 let musicList = [];
 let enhancement = false;
+let curentSongIndex = -1;
+let settingsAutoPlaying = true;
 const musicPlayer = new MusicPlayer(null);
 const visualizer = new Visualizer(
   document.getElementById("canvas"),
@@ -14,6 +16,7 @@ const visualizer = new Visualizer(
 async function fetchMusicList(url) {
   try {
     const response = await axios.get(musicListUrl);
+    console.log(response)
     const data = response.data.songs;
     return data;
   } catch (error) {
@@ -24,9 +27,10 @@ async function fetchMusicList(url) {
 async function getMusicData(id) {
   try {
     const quality = "exhigh";
-    const url = `${apiUrl}/song/url/v1?id=${id}&level=${quality}`;
+    const url = `${apiUrl}/api/song/resource?id=${id}&level=${quality}`;
     const response = await axios.get(url);
     const data = response.data.data[0].url;
+    console.log(data)
     return data;
   } catch (error) {
     console.error("获取音乐数据失败:", error);
@@ -82,9 +86,10 @@ document.addEventListener("click", async (e) => {
       if (songUrl.startsWith("http://")) {
         songUrl = songUrl.replace("http://", "https://");
       }
+      // currentSongIndex = musicList.findIndex((s) => s.id == songId);
+      // console.log("当前歌曲索引:", currentSongIndex);
       let song = new Audio(songUrl);
       song.crossOrigin = "anonymous";
-      // song.play();
       musicPlayer.updateSong(song, title);
       visualizer.changeSong(song);
       musicPlayer.togglePlaying();
@@ -93,7 +98,7 @@ document.addEventListener("click", async (e) => {
 });
 
 let isLoading = false;
-let page = 1; // 当前页码
+let page = 1; // current page
 window.addEventListener("scroll", () => {
   if (isLoading) return;
   if (isConcealed) return;
@@ -102,13 +107,13 @@ window.addEventListener("scroll", () => {
   const windowHeight = window.innerHeight;
   const docHeight = document.documentElement.scrollHeight;
 
-  // 当接近底部 100px 内时加载
+  // load additional list when reach 100px from the bottom
   if (scrollTop + windowHeight >= docHeight - 100) {
     isLoading = true;
     offset += limit;
     musicListUrl = `${apiUrl}/playlist/track/all?id=${playListId}&limit=${limit}&offset=${offset}`;
     console.log(musicList);
-    // 模拟异步加载
+    // async load music list
     fetchMusicList(musicListUrl).then((data) => {
       isLoading = false;
       console.log(data);
