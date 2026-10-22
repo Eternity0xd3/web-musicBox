@@ -4,7 +4,7 @@ let limit = 15;
 let offset = 0;
 let musicListUrl = `${apiUrl}/api/playlist/track?id=${playListId}&limit=${limit}&offset=${offset}`;
 let musicList = [];
-let enhancement = false;
+let enhancement = true;
 let curentSongIndex = -1;
 let settingsAutoPlaying = true;
 const musicPlayer = new MusicPlayer(null);
@@ -86,8 +86,6 @@ document.addEventListener("click", async (e) => {
       if (songUrl.startsWith("http://")) {
         songUrl = songUrl.replace("http://", "https://");
       }
-      // currentSongIndex = musicList.findIndex((s) => s.id == songId);
-      // console.log("当前歌曲索引:", currentSongIndex);
       let song = new Audio(songUrl);
       song.crossOrigin = "anonymous";
       musicPlayer.updateSong(song, title);
