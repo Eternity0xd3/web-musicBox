@@ -109,7 +109,6 @@ window.addEventListener("scroll", () => {
   if (scrollTop + windowHeight >= docHeight - 100) {
     isLoading = true;
     offset += limit;
-    musicListUrl = `${apiUrl}/playlist/track/all?id=${playListId}&limit=${limit}&offset=${offset}`;
     console.log(musicList);
     // async load music list
     fetchMusicList(musicListUrl).then((data) => {
